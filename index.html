@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Resizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      color: #333;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    input[type="file"] {
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #output {
+      margin-top: 20px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PDF Resizer</h1>
+    <form id="upload-form">
+      <input type="file" id="pdf-file" accept="application/pdf" required>
+      <button type="submit">Resize PDF</button>
+    </form>
+    <div id="output"></div>
+  </div>
+  <script>
+    document.getElementById("upload-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.getElementById("pdf-file").files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("pdf", file);
+
+      document.getElementById("output").innerText = "Processing...";
+
+      try {
+        const response = await fetch("/resize", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "resized.pdf";
+          link.click();
+          document.getElementById("output").innerText = "Download complete!";
+        } else {
+          document.getElementById("output").innerText =
+            "Failed to resize PDF. Try again.";
+        }
+      } catch (error) {
+        document.getElementById("output").innerText = "An error occurred.";
+      }
+    });
+  </script>
+</body>
+</html>
